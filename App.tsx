@@ -11,7 +11,6 @@ import NewsletterPopup from './components/NewsletterPopup';
 import Notification from './components/Notification';
 import { Product, CartItem, View, User } from './types';
 import { PRODUCTS } from './constants';
-import { sendAbandonedCartEmail } from './resendService';
 
 const App: React.FC = () => {
   const [view, setView] = useState<View>('home');
@@ -21,62 +20,18 @@ const App: React.FC = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [user, setUser] = useState<User | null>(null);
   
-  // Notification State
+  // Notification State para mensagens de sistema (ex: compra concluída)
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'info' | 'error', visible: boolean}>({
     message: '',
     type: 'info',
     visible: false
   });
 
-  // Tracking abandoned cart
-  const abandonedTimerRef = useRef<any>(null);
-  const hasSentAbandonedEmailRef = useRef(false);
-
   const selectedProduct = useMemo(() => 
     PRODUCTS.find(p => p.id === selectedProductId) || null
   , [selectedProductId]);
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
-  // Abandoned cart logic
-  useEffect(() => {
-    // Clear existing timer whenever cart, user or view changes
-    if (abandonedTimerRef.current) {
-      clearTimeout(abandonedTimerRef.current);
-    }
-
-    const isSuccessView = (view as string) === 'success';
-
-    if (cartItems.length > 0 && user?.email && !hasSentAbandonedEmailRef.current && !isSuccessView) {
-      abandonedTimerRef.current = setTimeout(async () => {
-        // Trigger email
-        setNotification({
-          message: 'Enviando lembrete de sacola abandonada...',
-          type: 'info',
-          visible: true
-        });
-
-        const sent = await sendAbandonedCartEmail(
-          user.email, 
-          user.firstName || 'Client', 
-          cartItems.length
-        );
-
-        if (sent) {
-          hasSentAbandonedEmailRef.current = true;
-          setNotification({
-            message: 'E-mail de recuperação enviado com sucesso!',
-            type: 'success',
-            visible: true
-          });
-        }
-      }, 30000); // 30 seconds
-    }
-
-    return () => {
-      if (abandonedTimerRef.current) clearTimeout(abandonedTimerRef.current);
-    };
-  }, [cartItems, user, view]);
 
   const handleAddToCart = useCallback((product: Product) => {
     setCartItems(prev => {
@@ -111,7 +66,6 @@ const App: React.FC = () => {
   };
 
   const handleCompletePurchase = () => {
-    if (abandonedTimerRef.current) clearTimeout(abandonedTimerRef.current);
     setView('success');
     setNotification({
       message: 'Compra realizada com sucesso. Merci!',
@@ -271,7 +225,6 @@ const App: React.FC = () => {
         onClose={() => setIsAuthModalOpen(false)} 
         onLogin={(u) => {
           setUser(u);
-          hasSentAbandonedEmailRef.current = false; 
         }}
       />
 
