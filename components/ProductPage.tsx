@@ -1,7 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
 import { Product } from '../types';
-import { getStylistAdvice } from '../geminiService';
 
 interface ProductPageProps {
   product: Product | null;
@@ -11,8 +9,6 @@ interface ProductPageProps {
 
 const ProductPage: React.FC<ProductPageProps> = ({ product, onAddToCart, onBack }) => {
   const [activeImage, setActiveImage] = useState(0);
-  const [advice, setAdvice] = useState<string | null>(null);
-  const [isLoadingAdvice, setIsLoadingAdvice] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -21,13 +17,6 @@ const ProductPage: React.FC<ProductPageProps> = ({ product, onAddToCart, onBack 
   if (!product) return null;
 
   const images = [product.image, ...product.additionalImages];
-
-  const handleGetAdvice = async () => {
-    setIsLoadingAdvice(true);
-    const text = await getStylistAdvice(product.name);
-    setAdvice(text);
-    setIsLoadingAdvice(false);
-  };
 
   return (
     <div className="min-h-screen bg-white animate-fade-in pb-20">
@@ -43,7 +32,6 @@ const ProductPage: React.FC<ProductPageProps> = ({ product, onAddToCart, onBack 
         </button>
 
         <div className="grid lg:grid-cols-12 gap-16">
-          {/* Gallery Section */}
           <div className="lg:col-span-8 flex flex-col-reverse lg:flex-row gap-6">
             <div className="lg:w-20 flex lg:flex-col flex-row gap-4 overflow-x-auto lg:overflow-visible pb-4 lg:pb-0">
               {images.map((img, idx) => (
@@ -62,13 +50,9 @@ const ProductPage: React.FC<ProductPageProps> = ({ product, onAddToCart, onBack 
                 alt={product.name} 
                 className="w-full h-full object-cover animate-fade-in"
               />
-              <div className="absolute top-6 left-6">
-                <span className="bg-white/80 backdrop-blur-sm px-4 py-2 text-[10px] uppercase tracking-widest font-bold">In Focus</span>
-              </div>
             </div>
           </div>
 
-          {/* Details Section */}
           <div className="lg:col-span-4 space-y-12">
             <div className="space-y-4">
               <span className="text-[10px] uppercase tracking-[0.4em] text-stone-400 block">{product.category}</span>
@@ -102,30 +86,6 @@ const ProductPage: React.FC<ProductPageProps> = ({ product, onAddToCart, onBack 
               >
                 Acquire for Bag
               </button>
-
-              <div className="p-8 bg-stone-50 space-y-4 border-l-2 border-stone-900">
-                <button 
-                  onClick={handleGetAdvice}
-                  className="flex items-center space-x-3 group"
-                >
-                  <div className="p-2 bg-white rounded-full shadow-sm group-hover:scale-110 transition-transform">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-stone-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                  </div>
-                  <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-stone-900">Consult AI Stylist</span>
-                </button>
-                
-                {isLoadingAdvice && (
-                  <p className="text-[10px] text-stone-400 animate-pulse tracking-widest">TRANSCRIBING FROM THE PARISIAN ATELIER...</p>
-                )}
-                
-                {advice && (
-                  <p className="text-xs italic text-stone-700 leading-relaxed font-light animate-fade-in">
-                    "{advice}"
-                  </p>
-                )}
-              </div>
             </div>
           </div>
         </div>

@@ -1,7 +1,5 @@
-
 import React, { useState } from 'react';
 import { Product } from '../types';
-import { getStylistAdvice } from '../geminiService';
 
 interface ProductDetailModalProps {
   product: Product | null;
@@ -11,19 +9,10 @@ interface ProductDetailModalProps {
 
 const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, onClose, onAddToCart }) => {
   const [activeImage, setActiveImage] = useState(0);
-  const [advice, setAdvice] = useState<string | null>(null);
-  const [isLoadingAdvice, setIsLoadingAdvice] = useState(false);
 
   if (!product) return null;
 
   const images = [product.image, ...product.additionalImages];
-
-  const handleGetAdvice = async () => {
-    setIsLoadingAdvice(true);
-    const text = await getStylistAdvice(product.name);
-    setAdvice(text);
-    setIsLoadingAdvice(false);
-  };
 
   return (
     <div className="fixed inset-0 z-[160] flex items-center justify-center lg:p-12 p-4">
@@ -68,28 +57,6 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, onClos
             
             <div className="prose prose-sm text-stone-600 font-light leading-relaxed mb-12">
               <p>{product.description}</p>
-            </div>
-
-            <div className="space-y-4 mb-12">
-              <button 
-                onClick={handleGetAdvice}
-                className="flex items-center space-x-2 text-[10px] uppercase tracking-widest text-stone-500 hover:text-stone-900 transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-                <span>{advice ? 'Stylist Advice Provided' : 'Ask our Parisien Stylist'}</span>
-              </button>
-              
-              {isLoadingAdvice && (
-                <div className="text-xs italic text-stone-400 animate-pulse">Consulting the archives...</div>
-              )}
-              
-              {advice && (
-                <div className="p-4 bg-stone-50 border-l-2 border-stone-900 text-xs italic text-stone-700 animate-fade-in">
-                  "{advice}"
-                </div>
-              )}
             </div>
           </div>
 
